@@ -14,7 +14,7 @@ def get_game_videos_data(game: str,
     assert resolution in {"224p", "720p"}
 
     game_dir = constants.soccernet_dir / game
-    labels_json_path = game_dir / "Labels-ball.json"
+    labels_json_path = game_dir / constants.labels_filename #"labels_challange_2024.json"
     with open(labels_json_path) as file:
         labels = json.load(file)
 
@@ -29,7 +29,7 @@ def get_game_videos_data(game: str,
 
     half2video_data = dict()
     for half in halves:
-        half_video_path = str(game_dir / f"{half}_{resolution}.mkv")
+        half_video_path = str(game_dir / f"{resolution}.{constants.videos_extension}") # f"{half}_{resolution}.mkv")
         half2video_data[half] = dict(
             video_path=half_video_path,
             game=game,

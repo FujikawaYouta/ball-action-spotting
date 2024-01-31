@@ -192,19 +192,16 @@ if __name__ == "__main__":
     with open(experiments_dir / "config.json", "w") as outfile:
         json.dump(config, outfile, indent=4)
 
-    if args.folds == "all":
-        folds = constants.folds
-    else:
-        folds = [int(fold) for fold in args.folds.split(",")]
-
-    for fold in folds:
-        train_folds = list(set(constants.folds) - {fold})
-        val_games = constants.fold2games[fold]
+    if args.folds == 'train':
+        train_folds = [0, 1, 2, 3, 4]
+        val_folds = [5, 6]
         train_games = []
+        val_games = constants.fold2games[5] + constants.fold2games[6]
+
         for train_fold in train_folds:
             train_games += constants.fold2games[train_fold]
-        fold_experiment_dir = experiments_dir / f"fold_{fold}"
-        print(f"Val fold: {fold}, train folds: {train_folds}")
+        fold_experiment_dir = experiments_dir / f"fold_train"
+        print(f"Val folds: {val_folds}, train folds: {train_folds}")
         print(f"Val games: {val_games}, train games: {train_games}")
         print(f"Fold experiment dir: {fold_experiment_dir}")
         train_ball_action(config, fold_experiment_dir, train_games, val_games)
@@ -212,3 +209,25 @@ if __name__ == "__main__":
         torch._dynamo.reset()
         torch.cuda.empty_cache()
         time.sleep(12)
+
+    else:
+        if args.folds == "all":
+            folds = constants.folds
+        else:
+            folds = [int(fold) for fold in args.folds.split(",")]
+
+        for fold in folds:
+            train_folds = list(set(constants.folds) - {fold})
+            val_games = constants.fold2games[fold]
+            train_games = []
+            for train_fold in train_folds:
+                train_games += constants.fold2games[train_fold]
+            fold_experiment_dir = experiments_dir / f"fold_{fold}"
+            print(f"Val fold: {fold}, train folds: {train_folds}")
+            print(f"Val games: {val_games}, train games: {train_games}")
+            print(f"Fold experiment dir: {fold_experiment_dir}")
+            train_ball_action(config, fold_experiment_dir, train_games, val_games)
+
+            torch._dynamo.reset()
+            torch.cuda.empty_cache()
+            time.sleep(12)

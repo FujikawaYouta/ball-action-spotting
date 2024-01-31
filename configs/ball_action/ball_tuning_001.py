@@ -3,7 +3,7 @@ from src.utils import get_lr
 
 
 image_size = (1280, 736)
-batch_size = 4
+batch_size = 2
 base_lr = 3e-4
 frame_stack_size = 15
 
@@ -44,8 +44,8 @@ config = dict(
             "act_layer": "silu",
         }),
         "loss": ("focal_loss", {
-            "alpha": 0.4,
-            "gamma": 1.2,
+            "alpha": 0.5,  # 0.4
+            "gamma": 1,  # 1.2
             "reduction": "mean",
         }),
         "optimizer": ("AdamW", {

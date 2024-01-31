@@ -2,11 +2,11 @@ NAME?=ball-action-spotting
 COMMAND?=bash
 OPTIONS?=
 
-GPUS?=all
+GPUS?=device=0  # gpu 0
 ifeq ($(GPUS),none)
 	GPUS_OPTION=
 else
-	GPUS_OPTION=--gpus=$(GPUS)
+	GPUS_OPTION=--gpus $(GPUS)
 endif
 
 .PHONY: all
@@ -14,12 +14,12 @@ all: stop build run
 
 .PHONY: build
 build:
-	docker build -t $(NAME) .
+	docker build -t ball-container .
 
 .PHONY: stop
 stop:
-	-docker stop $(NAME)
-	-docker rm $(NAME)
+	-docker stop ball-container
+	-docker rm ball-container
 
 .PHONY: run
 run:
@@ -29,19 +29,19 @@ run:
 		$(OPTIONS) \
 		$(GPUS_OPTION) \
 		-v $(shell pwd):/workdir \
-		--name=$(NAME) \
-		$(NAME) \
+		--name=ball-container \
+		ball-container \
 		$(COMMAND)
-	docker attach $(NAME)
+	docker attach ball-container
 
 .PHONY: attach
 attach:
-	docker attach $(NAME)
+	docker attach ball-container
 
 .PHONY: logs
 logs:
-	docker logs -f $(NAME)
+	docker logs -f ball-container
 
 .PHONY: exec
 exec:
-	docker exec -it $(OPTIONS) $(NAME) $(COMMAND)
+	docker exec -it $(OPTIONS) ball-container $(COMMAND)

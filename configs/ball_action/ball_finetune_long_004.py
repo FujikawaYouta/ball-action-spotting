@@ -3,7 +3,7 @@ from src.utils import get_lr
 
 
 image_size = (1280, 736)
-batch_size = 4
+batch_size = 1
 base_lr = 1e-3
 frame_stack_size = 33
 
