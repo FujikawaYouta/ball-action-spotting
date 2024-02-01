@@ -41,12 +41,14 @@ def evaluate_predictions(experiment: str, fold: int, challenge: bool):
         Predictions_path=str(predictions_path),
         list_games=games,
         prediction_file="results_spotting.json",
-        version=2,
-        metric="at1",
-        num_classes=constants.num_classes,
         label_files=constants.labels_filename,
-        dataset="NewBallAction",
-        framerate=25,
+        metric="at1",
+        version=2, framerate=25,
+        dataset=None,
+        EVENT_DICTIONARY={'PASS': 0, 'DRIVE': 1, 'HEADER': 2, 'HIGH PASS': 3,
+                          'OUT': 4, 'CROSS': 5, 'THROW IN': 6, 'SHOT': 7,
+                          'BALL PLAYER BLOCK': 8, 'PLAYER SUCCESSFUL TACKLE': 9,
+                          'FREE KICK': 10, 'GOAL': 11}
     )
 
     print("Average mAP@1: ", results["a_mAP"])
