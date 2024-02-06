@@ -30,7 +30,7 @@ challenge_games = [
 #     "DRIVE",
 # ]
 
-labels_filename = "labels_challange_2024.json"
+labels_filename = "Labels-ball.json"
 videos_extension = 'mp4'
 
 classes = ['PASS', 'DRIVE', 'HEADER', 'HIGH PASS', 'OUT', 'CROSS', 'THROW IN',
