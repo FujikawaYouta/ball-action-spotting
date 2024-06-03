@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Optional   # TODO 0101 增加参数
 
 import numpy as np
 from scipy.ndimage import maximum_filter
@@ -114,31 +115,70 @@ def prepare_game_spotting_results(half2class_actions: dict, game: str, predictio
     with open(game_prediction_dir / "postprocess_params.json", "w") as outfile:
         json.dump(constants.postprocess_params, outfile, indent=4)
 
-
+# TODO 0101 这里本没有注释，看不懂的多了，也便有了
+# 该函数的作用是对采样权重初始化，采样权重weights是一个数组，每个元素都是对应帧的采样概率
 def get_video_sampling_weights(video_data: dict,
                                action_window_size: int,
                                action_prob: float,
+                               action_weights: Optional[dict],# TODO 0101 增加参数
                                pred_experiment: str,
                                clear_pred_window_size: int) -> np.ndarray:
     assert clear_pred_window_size >= action_window_size
-    weights = np.zeros(video_data["frame_count"])
+    weights = np.zeros(video_data["frame_count"])   # 用0初始化weights
 
+    # TODO 0101 增加对不同动作采样的权重
+    print('action_weights=',action_weights)
+    frame_count = video_data["frame_count"]
     for frame_index, action in video_data["frame_index2action"].items():
-        weights[frame_index] = 1.0
+        # print('action=',action)
+        if frame_index >= frame_count:
+            print(f"Clip action {action} on {frame_index} frame. "
+                  f"Video: {video_data['video_path']}, {frame_count=}")
+            frame_index = frame_count - 1
+        value = action_weights[action] if action_weights is not None else 1.0
+        weights[frame_index] = max(value, weights[frame_index])
 
+    # 动作帧的weights赋值为1，这一部分是原来baseline的
+    # for frame_index, action in video_data["frame_index2action"].items():
+    #     weights[frame_index] = 1.0
+    # TODO 0101
+
+    # 这个action_window_size，clear_pred_window_size在
+    # sampling_weights_001（basic_training中初始采样，会将初次采样结果存入npz）中是9，9
+    # ball_tuning_001（transfer learning中继续采样）是9，27
+    # ball_finetuning_001（微调中继续采样）是9，27
+    
+    # maximum_filter让weights中action周围的帧都变成1，具体帧数由size决定
     clear_pred_mask = maximum_filter(weights, size=clear_pred_window_size)
     weights = maximum_filter(weights, size=action_window_size)
     clear_pred_mask -= weights
-    clear_pred_mask = clear_pred_mask == 1.0
+    # TODO 0101
+    # 在我们给每一个action赋值权重之后，就不是1了，所以改成！=0才能和之前一样
+    # clear_pred_mask = clear_pred_mask == 1.0    
+    clear_pred_mask = clear_pred_mask != 0  
+    # TODO 0101
     no_action_mask = weights == 0.0
     no_action_count = no_action_mask.sum()
 
     no_action_weights_sum = (1 - action_prob) / action_prob * weights.sum()
     weights[no_action_mask] = no_action_weights_sum / no_action_count
+    # 中间这么一长串的处理就是为了让动作帧和非动作帧的采样概率相同
+    # 但是并没有解决动作帧内部不同动作的采样概率
+    # 按照action的想法，应该在给action赋初值1的时候就改成不同动作的权重
 
+    # 这个只有transfer learning和fine tuning有
+    # 是拿之前basic training的采样预测结果npz进行重新采样，也就是readme里介绍的第三阶段的采样
     if pred_experiment:
         game = video_data["game"]
         half = video_data["half"]
+        # prediction_path = (
+        #         constants.predictions_dir
+        #         / pred_experiment
+        #         / "test"
+        #         / f"fold_train"
+        #         / game
+        #         / f"{half}_raw_predictions.npz"
+        # )
         prediction_path = (
                 constants.predictions_dir
                 / pred_experiment
@@ -165,12 +205,13 @@ def get_video_sampling_weights(video_data: dict,
 def get_videos_sampling_weights(videos_data: list[dict],
                                 action_window_size: int,
                                 action_prob: float,
+                                action_weights: Optional[dict],
                                 pred_experiment: str,
                                 clear_pred_window_size: int) -> list[np.ndarray]:
     videos_sampling_weights = []
     for video_data in videos_data:
         video_sampling_weights = get_video_sampling_weights(
-            video_data, action_window_size, action_prob, pred_experiment, clear_pred_window_size
+            video_data, action_window_size, action_prob, action_weights, pred_experiment, clear_pred_window_size
         )
         videos_sampling_weights.append(video_sampling_weights)
     return videos_sampling_weights

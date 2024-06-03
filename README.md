@@ -1,12 +1,9 @@
 
 # SoccerNet Ball Action Spotting Challenge 2024 Baseline
 
-This repo is a fork of the [1st place solution](https://github.com/lRomul/ball-action-spotting) for the [SoccerNet Ball Action Spotting Challenge 2023](https://www.soccer-net.org/challenges/2023#h.vverf0niv2is).
+This repo is a fork of the [baseline for the SoccerNet Ball Action Spotting Challenge 2024](https://github.com/recokick/ball-action-spotting) for the [SoccerNet Ball Action Spotting Challenge 2024](https://www.soccer-net.org/challenges/2024).
 
-The 2024 Ball Action Spotting baseline was trained using weights from stage 2 of the solution above and transfer learning approach as desribed in step 3,
-with changes in focal loss with parameters gamma 1.0 and alpha 0.5.
-
-Thanks to the amazing work of the 1st place winner og the 2023 Ball Action Spotting Challenge Ruslan Baikulov!
+This repo stores the solution of SoccerNet Ball Action Spotting Challenge 2024 by Team Ai4sports. We tried some methods to improve the ability of classification.
 
 ## Quick setup and start
 
@@ -29,30 +26,6 @@ cd ball-action-spotting
 
 Build a Docker image and run a container.
 
-<details><summary>Here is a small guide on how to use the provided Makefile</summary>
-
-```bash
-make  # stop, build, run
-
-# do the same
-make stop
-make build
-make run
-
-make  # by default GPU 0 passed
-make GPUS=all  # all GPUs
-make GPUS=none  # without GPUs
-
-make run GPUS=2  # pass the first two GPUs
-make run GPUS='\"device=1,2\"'  # pass GPUs numbered 1 and 2
-
-make logs
-make exec  # run a new command in a running container
-make exec COMMAND="bash"  # do the same
-make stop
-```
-
-</details>
 
 ```bash
 make
@@ -108,3 +81,4 @@ python scripts/ball_action/ensemble.py --experiments ball_tuning_001 --challenge
 cd data/ball_action/predictions/ball_tuning_001/challenge/ensemble/
 zip results_spotting.zip ./*/*/*/results_spotting.json
 ```
+

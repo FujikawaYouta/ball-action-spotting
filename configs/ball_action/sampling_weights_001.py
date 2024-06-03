@@ -3,7 +3,7 @@ from src.utils import get_lr
 
 
 image_size = (1280, 736)
-batch_size = 2
+batch_size = 4
 base_lr = 3e-4
 frame_stack_size = 15
 
@@ -18,6 +18,22 @@ config = dict(
     train_sampling_weights=dict(
         action_window_size=9,
         action_prob=0.5,
+        # TODO 0101 增加14*weigths参数，对应加参数的位置我就不一个一个标注了，自己找
+        action_weights={
+            "PASS" : 0.196,
+            "DRIVE" : 0.21,
+            "HEADER" : 0.518,
+            "HIGH PASS" : 0.49000000000000005,
+            "OUT" : 0.5880000000000001,
+            "CROSS" : 0.854,
+            "THROW IN" : 0.728,
+            "SHOT" : 1.064,
+            "BALL PLAYER BLOCK" : 0.924,
+            "PLAYER SUCCESSFUL TACKLE" : 1.596,
+            "FREE KICK" : 3.01,
+            "GOAL" : 3.822,
+        },
+        # TODO 0101
         pred_experiment="",
         clear_pred_window_size=9,
     ),

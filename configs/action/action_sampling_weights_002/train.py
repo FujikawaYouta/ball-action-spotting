@@ -49,10 +49,9 @@ def train_ball_action(config: dict, save_dir: Path,
         model.params["nn_module"][1]["pretrained"] = False
 
     pretrain_dir = ""
-    if config["pretrain_action_experiment"]: # action spotting or ball_action spotting
+    if config["pretrain_action_experiment"]:
         pretrain_dir = action_experiments_dir / config["pretrain_action_experiment"]
     elif config["pretrain_ball_experiment"]:
-        fold = 0   #   zhe li zhi kao lv basic + transfer
         pretrain_dir = constants.experiments_dir / config["pretrain_ball_experiment"] / f"fold_{fold}"
 
     if pretrain_dir:
@@ -70,15 +69,13 @@ def train_ball_action(config: dict, save_dir: Path,
 
     targets_processor = MaxWindowTargetsProcessor(
         window_size=config["max_targets_window_size"]
-    ) # eg. given a 36-frame video, with window_size 15, [9,27) frame will be cropped
+    )
     frames_processor = get_frames_processor(*argus_params["frames_processor"])
     indexes_generator = StackIndexesGenerator(
         argus_params["frame_stack_size"],
         argus_params["frame_stack_step"],
-    ) # eg. given a frame index 52, with frame_stack_size 15 and frame_stack_step, [52-14, 52+16) will be stacked
-    frame_index_shaker = FrameIndexShaker(**config["frame_index_shaker"]) # decide whether this frame is to shake
-    # eg. with shifts[-1, 0, 1], weights[.2, .6, .2], prob .25, each frame has .25 probabilites to shake,
-    # for each shake, option -1 is .2, option 0 is .6, option 1 is .2
+    )
+    frame_index_shaker = FrameIndexShaker(**config["frame_index_shaker"])
 
     print("EMA decay:", config["ema_decay"])
     model.model_ema = ModelEma(model.nn_module, decay=config["ema_decay"])

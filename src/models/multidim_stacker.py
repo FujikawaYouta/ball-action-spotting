@@ -133,6 +133,51 @@ class InvertedResidual3d(nn.Module):
         x = self.drop_path(x) + shortcut
         return x
 
+class Residual3d(nn.Module):
+    def __init__(self,
+                 in_features: int,
+                 out_features: int,
+                 expansion_ratio: int = 2,
+                 se_reduce_ratio: int = 4,
+                 act_layer=nn.ReLU,
+                 drop_path_rate: float = 0.,
+                 bias: bool = False):
+        super().__init__()
+        mid_features = in_features // expansion_ratio
+        
+        # 降维
+        self.conv1 = nn.Conv3d(in_features, mid_features, (1,1,1), bias=bias)
+        self.bn1 = BatchNormAct3d(mid_features, act_layer=act_layer)
+
+        # 提取特征
+        self.conv2 = nn.Conv3d(mid_features, mid_features,
+                                 kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1),
+                                 groups=mid_features // 4, bias=bias)
+        self.bn2 = BatchNormAct3d(mid_features, act_layer=act_layer)
+        
+        # Squeeze-and-excitation
+        self.se = SqueezeExcite(mid_features, act_layer=act_layer, reduce_ratio=se_reduce_ratio)
+        
+        # 升维
+        self.conv3 = nn.Conv3d(mid_features, out_features, (1,1,1), bias=bias)
+        self.bn3 = nn.BatchNorm3d(out_features)   
+        self.act = act_layer
+        self.drop_path = DropPath(drop_path_rate) if drop_path_rate else nn.Identity()
+
+    def forward(self, x):
+        shortcut = x
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.se(x)
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = self.drop_path(x) + shortcut
+        # x = self.act(x)
+        # print("this is residual3d block!!!!!!")
+        return x
+ 
 
 class MultiDimStacker(nn.Module):
     def __init__(self,

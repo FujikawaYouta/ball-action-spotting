@@ -76,7 +76,7 @@ class ActionDataset(metaclass=abc.ABCMeta):
             index: int,
             frame_fetcher_class: Type[AbstractFrameFetcher] = NvDecFrameFetcher,
             gpu_id: int = 0) -> tuple[torch.Tensor, torch.Tensor]:
-        video_index, frame_indexes = self.get_video_frame_indexes(index)
+        video_index, frame_indexes = self.get_video_frame_indexes(index) # video index + frame index
         frame_fetcher = self.get_frame_fetcher(video_index, frame_fetcher_class, gpu_id)
         frames, targets = self.get_frames_targets(video_index, frame_indexes, frame_fetcher)
         return self.process_frames_targets(frames, targets)
